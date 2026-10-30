@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+app/static/assets/
+app/static/index.html
+app/static/favicon.svg
+app/static/icons.svg
+web/node_modules/
+web/dist/
+.DS_Store
+*.egg-info/
+.pytest_cache/
