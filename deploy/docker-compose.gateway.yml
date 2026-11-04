@@ -1,0 +1,21 @@
+# 接 nginx-gateway 部署（不映射宿主机端口，只进网关网络）
+# 用法：docker compose -f deploy/docker-compose.gateway.yml up -d --build
+# 网络名按实际修改：docker network ls
+
+services:
+  imgkit:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: imgkit:latest
+    container_name: imgkit
+    restart: unless-stopped
+    expose:
+      - "8787"
+    networks:
+      - nginx-gateway
+
+networks:
+  nginx-gateway:
+    external: true
+    name: nginx-gateway

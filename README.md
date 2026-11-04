@@ -133,10 +133,10 @@ make dev-api
 多阶段构建：Node 构建前端 → Python 精简镜像运行（监听 `8787`）。
 
 ```bash
-# 构建并前台启动
+# 本机调试
 docker compose up --build
 
-# 或仅构建镜像
+# 或
 docker build -t imgkit:latest .
 docker run --rm -p 8787:8787 imgkit:latest
 ```
@@ -144,6 +144,44 @@ docker run --rm -p 8787:8787 imgkit:latest
 浏览器打开：**http://127.0.0.1:8787/**
 
 镜像内以非 root 用户运行；处理全程内存，无需挂载数据卷。
+
+### 接 nginx-gateway（子域反代）
+
+imgkit **单进程**同时提供页面与 `/api`，网关整站反代到容器 `8787` 即可（不必拆前后端）。
+
+1. **DNS**：`imgkit.jiangbyte.cn` → 服务器 IP（证书需覆盖该子域，例如 `*.jiangbyte.cn`）。
+2. **确认网关网络名**：
+
+```bash
+docker network ls
+# 常见为 nginx-gateway，按实际修改 deploy/docker-compose.gateway.yml
+```
+
+3. **启动容器并加入网关网络**：
+
+```bash
+cd /path/to/imgkit
+# 先按实际改 deploy/docker-compose.gateway.yml 里的 networks.name
+docker compose -f deploy/docker-compose.gateway.yml up -d --build
+```
+
+4. **放入 Nginx 配置**（仓库内模板：`deploy/imgkit.conf`）：
+
+```bash
+cp deploy/imgkit.conf /opt/nginx-gateway/conf.d/imgkit.conf
+# 如网关容器名不是 nginx，按你的方式 reload，例如：
+docker exec nginx-gateway nginx -t && docker exec nginx-gateway nginx -s reload
+```
+
+要点：
+
+| 项 | 说明 |
+|----|------|
+| `proxy_pass` | `http://imgkit:8787`（容器名 + 端口，**不要**尾斜杠乱改路径） |
+| `client_max_body_size` | ≥ 12m（服务端上传硬限 10MB） |
+| 限流 | 应用内按直连 IP 限流；经网关时可能看到的是网关 IP，公网请在 Nginx / 边缘再做限流 |
+
+访问：**https://imgkit.jiangbyte.cn/**
 
 ## API 一览
 
