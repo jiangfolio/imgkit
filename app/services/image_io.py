@@ -190,7 +190,11 @@ def file_response(data: bytes, fmt: str, download_name: str) -> Response:
 def zip_streaming_response(buf: BytesIO, download_name: str = "favicon-pack.zip") -> StreamingResponse:
     """ZIP 内存流响应。"""
     buf.seek(0)
-    safe_ascii = "favicon-pack.zip"
+    safe_ascii = "".join(
+        c if c.isascii() and c.isalnum() or c in "._-" else "_" for c in download_name
+    )
+    if not safe_ascii.endswith(".zip"):
+        safe_ascii = (safe_ascii or "download") + ".zip"
     encoded = quote(download_name)
     headers = {
         "Content-Disposition": (

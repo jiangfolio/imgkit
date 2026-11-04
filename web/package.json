@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "@zxing/library": "^0.21.3",
+    "ant-design-vue": "^4.2.6",
+    "jszip": "^3.10.1",
     "vue": "^3.5.44"
   },
   "devDependencies": {

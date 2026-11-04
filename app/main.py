@@ -6,7 +6,17 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import compress, convert, favicon, resize
+from app.api import (
+    barcode_api,
+    colors,
+    compress,
+    convert,
+    favicon,
+    grid,
+    qrcode_api,
+    resize,
+    stitch,
+)
 from app.errors import AppError, app_error_handler, unhandled_error_handler
 from app.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
 
@@ -14,8 +24,8 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(
     title="imgkit",
-    description="即时、无落盘图像处理（Favicon / 压缩 / 缩放 / 格式转换）",
-    version="1.0.0",
+    description="即时、无落盘图像处理小工具",
+    version="1.1.0",
     docs_url=None,
     redoc_url=None,
     openapi_url=None,
@@ -30,6 +40,11 @@ app.include_router(compress.router, prefix="/api")
 app.include_router(resize.router, prefix="/api")
 app.include_router(convert.router, prefix="/api")
 app.include_router(favicon.router, prefix="/api")
+app.include_router(stitch.router, prefix="/api")
+app.include_router(qrcode_api.router, prefix="/api")
+app.include_router(barcode_api.router, prefix="/api")
+app.include_router(colors.router, prefix="/api")
+app.include_router(grid.router, prefix="/api")
 
 
 @app.get("/api/health")

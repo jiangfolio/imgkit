@@ -1,0 +1,8 @@
+services:
+  imgkit:
+    build: .
+    image: imgkit:latest
+    ports:
+      - "8787:8787"
+    restart: unless-stopped
+    # 纯内存处理，无需挂载卷

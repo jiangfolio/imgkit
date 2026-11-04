@@ -1,90 +1,88 @@
 <script setup lang="ts">
-defineProps<{
-  title: string
-  desc: string
-  loading: boolean
-  error: string
-  canSubmit: boolean
-}>()
+import { ExperimentOutlined } from '@ant-design/icons-vue'
+
+withDefaults(
+  defineProps<{
+    title: string
+    desc: string
+    loading: boolean
+    error: string
+    canSubmit: boolean
+    submitLabel?: string
+    showSubmit?: boolean
+    showHead?: boolean
+  }>(),
+  {
+    submitLabel: '生成预览',
+    showSubmit: true,
+    showHead: true,
+  },
+)
 defineEmits<{ submit: [] }>()
 </script>
 
 <template>
-  <section class="panel">
-    <header class="head">
-      <h2>{{ title }}</h2>
-      <p>{{ desc }}</p>
-    </header>
+  <a-card class="panel" :bordered="true">
+    <template v-if="showHead" #title>
+      <div class="head">
+        <div class="title">{{ title }}</div>
+        <div class="desc">{{ desc }}</div>
+      </div>
+    </template>
     <div class="body">
       <slot />
     </div>
-    <footer class="foot">
-      <p v-if="error" class="err">{{ error }}</p>
-      <button
-        type="button"
-        class="primary"
-        :disabled="!canSubmit || loading"
-        @click="$emit('submit')"
-      >
-        {{ loading ? '处理中…' : '开始处理并下载' }}
-      </button>
-    </footer>
-  </section>
+    <div class="foot">
+      <a-alert v-if="error" type="error" :message="error" show-icon banner class="err" />
+      <slot name="footer">
+        <a-button
+          v-if="showSubmit"
+          type="primary"
+          :loading="loading"
+          :disabled="!canSubmit || loading"
+          @click="$emit('submit')"
+        >
+          <template v-if="!loading" #icon><ExperimentOutlined /></template>
+          {{ loading ? '处理中…' : submitLabel }}
+        </a-button>
+      </slot>
+    </div>
+  </a-card>
 </template>
 
 <style scoped>
 .panel {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-panel);
-  padding: 1.25rem;
 }
 
-.head h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.15rem;
+.head .title {
+  font-size: 1.05rem;
+  font-weight: 600;
 }
 
-.head p {
-  margin: 0 0 1rem;
+.head .desc {
+  margin-top: 0.2rem;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 400;
+  white-space: normal;
 }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.25rem;
 }
 
 .foot {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
   align-items: flex-start;
 }
 
-.primary {
-  border: 0;
-  background: var(--accent);
-  color: #fff;
-  padding: 0.55rem 1rem;
-  border-radius: var(--radius-ctrl);
-}
-
-.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-}
-
-.primary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 .err {
-  margin: 0;
-  color: var(--danger);
-  font-size: 0.9rem;
+  width: 100%;
 }
 </style>

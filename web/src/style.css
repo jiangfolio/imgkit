@@ -21,21 +21,6 @@ body {
   min-height: 100vh;
 }
 
-button,
-input,
-select {
-  font: inherit;
-  color: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-a {
-  color: var(--accent);
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -45,4 +30,22 @@ a {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* 侧栏菜单选中色贴近品牌橙 */
+.app-sider .ant-menu-light {
+  background: transparent !important;
+}
+
+.app-sider .ant-menu-light .ant-menu-item-selected {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+
+.app-sider .ant-menu-light .ant-menu-item-selected .anticon {
+  color: #fff !important;
+}
+
+.app-sider .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: var(--accent-soft) !important;
 }

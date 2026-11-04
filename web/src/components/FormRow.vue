@@ -1,50 +1,40 @@
 <script setup lang="ts">
-defineProps<{ label: string; hint?: string }>()
+withDefaults(
+  defineProps<{
+    label: string
+    hint?: string
+    /** 是否占满整行（长文本等） */
+    full?: boolean
+  }>(),
+  { full: false },
+)
 </script>
 
 <template>
-  <label class="row">
-    <span class="label">{{ label }}</span>
-    <span class="ctrl"><slot /></span>
-    <span v-if="hint" class="hint">{{ hint }}</span>
-  </label>
+  <a-form-item
+    :label="label"
+    :extra="hint || undefined"
+    class="row"
+    :class="{ full }"
+  >
+    <slot />
+  </a-form-item>
 </template>
 
 <style scoped>
 .row {
-  display: grid;
-  grid-template-columns: 7rem 1fr;
-  gap: 0.35rem 0.75rem;
-  align-items: center;
+  margin-bottom: 0;
+  min-width: 0;
 }
 
-.label {
-  font-size: 0.9rem;
-  color: var(--text);
+.row.full {
+  grid-column: 1 / -1;
 }
 
-.ctrl :deep(input),
-.ctrl :deep(select) {
+.row :deep(.ant-input-number),
+.row :deep(.ant-select),
+.row :deep(.ant-input),
+.row :deep(textarea.ant-input) {
   width: 100%;
-  max-width: 16rem;
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: var(--radius-ctrl);
-  padding: 0.4rem 0.55rem;
-}
-
-.hint {
-  grid-column: 2;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-@media (max-width: 560px) {
-  .row {
-    grid-template-columns: 1fr;
-  }
-  .hint {
-    grid-column: 1;
-  }
 }
 </style>

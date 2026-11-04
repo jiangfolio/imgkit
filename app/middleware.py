@@ -24,10 +24,15 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers.setdefault(
             "Content-Security-Policy",
             "default-src 'self'; img-src 'self' blob: data:; "
+            "media-src 'self' blob: mediastream:; "
             "style-src 'self' 'unsafe-inline'; script-src 'self'; "
             "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
         )
-        response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        # 扫描页允许本页调用摄像头；麦克风仍关闭
+        response.headers.setdefault(
+            "Permissions-Policy",
+            "camera=(self), microphone=(), geolocation=()",
+        )
         return response
 
 

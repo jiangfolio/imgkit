@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { InboxOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { message } from 'ant-design-vue'
+import type { UploadProps } from 'ant-design-vue'
 
 const props = defineProps<{ modelValue: File | null }>()
 const emit = defineEmits<{ 'update:modelValue': [File | null] }>()
 
-const dragOver = ref(false)
 const previewUrl = ref('')
-const error = ref('')
 
 const preview = computed(() => previewUrl.value)
 
@@ -17,9 +18,7 @@ watch(
       URL.revokeObjectURL(previewUrl.value)
       previewUrl.value = ''
     }
-    if (file) {
-      previewUrl.value = URL.createObjectURL(file)
-    }
+    if (file) previewUrl.value = URL.createObjectURL(file)
   },
 )
 
@@ -27,134 +26,72 @@ onBeforeUnmount(() => {
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
 })
 
-function acceptFile(file: File | undefined) {
-  error.value = ''
-  if (!file) return
+const beforeUpload: UploadProps['beforeUpload'] = (file) => {
   const ok = ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)
   if (!ok) {
-    error.value = '仅支持 PNG / JPEG / WebP'
-    emit('update:modelValue', null)
-    return
+    message.error('仅支持 PNG / JPEG / WebP')
+    return false
   }
-  emit('update:modelValue', file)
-}
-
-function onInput(e: Event) {
-  const input = e.target as HTMLInputElement
-  acceptFile(input.files?.[0])
-  input.value = ''
-}
-
-function onDrop(e: DragEvent) {
-  dragOver.value = false
-  acceptFile(e.dataTransfer?.files?.[0])
+  emit('update:modelValue', file as File)
+  return false
 }
 
 function clear() {
   emit('update:modelValue', null)
-  error.value = ''
 }
 </script>
 
 <template>
-  <div
-    class="picker"
-    :class="{ over: dragOver }"
-    @dragenter.prevent="dragOver = true"
-    @dragover.prevent="dragOver = true"
-    @dragleave.prevent="dragOver = false"
-    @drop.prevent="onDrop"
-  >
-    <input
-      id="file-input"
-      class="sr-only"
-      type="file"
+  <div>
+    <a-upload-dragger
+      v-if="!modelValue"
+      name="file"
+      :multiple="false"
+      :show-upload-list="false"
       accept="image/png,image/jpeg,image/webp"
-      @change="onInput"
-    />
-    <label v-if="!modelValue" for="file-input" class="hint">
-      拖拽图片到此处，或点击选择
-      <span class="sub">PNG / JPEG / WebP · 不支持 SVG · 不落盘</span>
-    </label>
-    <div v-else class="preview">
-      <img :src="preview" alt="预览" />
-      <div class="meta">
-        <div class="name">{{ modelValue.name }}</div>
-        <div class="sub">{{ (modelValue.size / 1024).toFixed(1) }} KB</div>
-        <button type="button" class="link" @click="clear">更换</button>
+      :before-upload="beforeUpload"
+    >
+      <p class="ant-upload-drag-icon">
+        <InboxOutlined />
+      </p>
+      <p class="ant-upload-text">拖拽图片到此处，或点击选择</p>
+      <p class="ant-upload-hint">PNG / JPEG / WebP · 不支持 SVG · 不落盘</p>
+    </a-upload-dragger>
+
+    <a-card v-else size="small" class="preview-card">
+      <div class="preview">
+        <a-image :src="preview" :width="96" :height="96" alt="预览" />
+        <div class="meta">
+          <div class="name">{{ modelValue.name }}</div>
+          <a-typography-text type="secondary">
+            {{ (modelValue.size / 1024).toFixed(1) }} KB
+          </a-typography-text>
+          <div>
+            <a-button type="link" size="small" danger @click="clear">
+              <template #icon><DeleteOutlined /></template>
+              更换
+            </a-button>
+          </div>
+        </div>
       </div>
-    </div>
-    <p v-if="error" class="err">{{ error }}</p>
+    </a-card>
   </div>
 </template>
 
 <style scoped>
-.picker {
-  border: 1px dashed var(--border);
-  background: var(--surface);
-  border-radius: var(--radius-panel);
-  padding: 1rem;
-  min-height: 140px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.picker.over {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.hint {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  align-items: center;
-  text-align: center;
-  cursor: pointer;
-  color: var(--text);
-  width: 100%;
-  padding: 1.5rem 0.5rem;
-}
-
-.sub {
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
 .preview {
   display: flex;
   gap: 1rem;
   align-items: center;
-  width: 100%;
 }
 
-.preview img {
-  width: 96px;
-  height: 96px;
+.preview :deep(.ant-image img) {
   object-fit: contain;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-ctrl);
   background: #fff;
 }
 
 .meta .name {
   font-weight: 600;
   word-break: break-all;
-}
-
-.link {
-  margin-top: 0.35rem;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  padding: 0;
-  text-decoration: underline;
-}
-
-.err {
-  margin: 0.5rem 0 0;
-  color: var(--danger);
-  width: 100%;
 }
 </style>
