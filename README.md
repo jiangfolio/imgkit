@@ -112,7 +112,7 @@ requirements.txt     Python 依赖
 ## 快速开始
 
 ```bash
-git clone git@github.com:jiangbyte/imgkit.git
+git clone git@github.com:jiangfolio/imgkit.git
 cd imgkit
 
 make install   # pip + pnpm
@@ -145,11 +145,11 @@ docker run --rm -p 8787:8787 imgkit:latest
 
 镜像内以非 root 用户运行；处理全程内存，无需挂载数据卷。
 
-### 接 nginx-gateway（子域反代）
+### 接反向代理（子域 / 路径反代）
 
 imgkit **单进程**同时提供页面与 `/api`，网关整站反代到容器 `8787` 即可（不必拆前后端）。
 
-1. **DNS**：`imgkit.jiangbyte.cn` → 服务器 IP（证书需覆盖该子域，例如 `*.jiangbyte.cn`）。
+1. **DNS / TLS**：把你的域名（示例：`imgkit.example.com`）解析到服务器，并准备对应证书。
 2. **确认网关网络名**：
 
 ```bash
@@ -165,12 +165,12 @@ cd /path/to/imgkit
 docker compose -f deploy/docker-compose.gateway.yml up -d --build
 ```
 
-4. **放入 Nginx 配置**（仓库内模板：`deploy/imgkit.conf`）：
+4. **放入 Nginx 配置**（仓库内模板：`deploy/imgkit.conf`，请先改 `server_name` 与证书路径）：
 
 ```bash
-cp deploy/imgkit.conf /opt/nginx-gateway/conf.d/imgkit.conf
-# 如网关容器名不是 nginx，按你的方式 reload，例如：
-docker exec nginx-gateway nginx -t && docker exec nginx-gateway nginx -s reload
+cp deploy/imgkit.conf /path/to/nginx/conf.d/imgkit.conf
+# 按你的网关方式校验并 reload，例如：
+# docker exec <nginx-container> nginx -t && docker exec <nginx-container> nginx -s reload
 ```
 
 要点：
@@ -181,7 +181,7 @@ docker exec nginx-gateway nginx -t && docker exec nginx-gateway nginx -s reload
 | `client_max_body_size` | ≥ 12m（服务端上传硬限 10MB） |
 | 限流 | 应用内按直连 IP 限流；经网关时可能看到的是网关 IP，公网请在 Nginx / 边缘再做限流 |
 
-访问：**https://imgkit.jiangbyte.cn/**
+访问你配置的域名即可（本地调试仍用 **http://127.0.0.1:8787/**）。
 
 ## API 一览
 
@@ -240,4 +240,4 @@ docker exec nginx-gateway nginx -t && docker exec nginx-gateway nginx -s reload
 
 ## 许可证
 
-[MIT](./LICENSE) © jiangbyte
+[MIT](./LICENSE)

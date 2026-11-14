@@ -653,7 +653,7 @@ async function stopCamera() {
           </div>
           <a
             class="github-link"
-            href="https://github.com/jiangbyte/imgkit"
+            href="https://github.com/jiangfolio/imgkit"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub 仓库"
